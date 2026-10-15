@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: serena-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: SUPABASE_URL
+        value: https://tutewhjlpnmicmdkcluc.supabase.co
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
