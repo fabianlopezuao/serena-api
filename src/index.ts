@@ -257,6 +257,54 @@ app.get("/sessions/:id/stats", async (req, res) => {
   });
 });
 
+// ---------- DOCENTES ----------
+// POST /teachers/register { email, password, teacher_code, full_name? }
+app.post("/teachers/register", async (req, res) => {
+  const { email, password, teacher_code, full_name } = req.body;
+  if (!email || !password || !teacher_code) {
+    return res.status(400).json({ error: "email, password y teacher_code requeridos" });
+  }
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) return res.status(400).json({ error: error.message });
+  const userId = data.user?.id;
+  if (!userId) return res.status(500).json({ error: "No se pudo crear el usuario" });
+
+  const { data: teacher, error: tErr } = await supabase
+    .from("teachers")
+    .insert({ id: userId, email, teacher_code, full_name: full_name ?? null })
+    .select()
+    .single();
+  if (tErr) return res.status(500).json({ error: tErr.message, user_id: userId });
+  res.status(201).json({ user: { id: userId, email }, teacher });
+});
+
+// POST /teachers/login { email, password }
+app.post("/teachers/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: "email y password requeridos" });
+  }
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return res.status(401).json({ error: error.message });
+  const { data: teacher } = await supabase
+    .from("teachers")
+    .select("*")
+    .eq("id", data.user.id)
+    .single();
+  res.json({ session: data.session, user: data.user, teacher });
+});
+
+// GET /teachers/:id -> perfil docente
+app.get("/teachers/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("teachers")
+    .select("*")
+    .eq("id", req.params.id)
+    .single();
+  if (error) return res.status(404).json({ error: "Docente no encontrado" });
+  res.json(data);
+});
+
 app.listen(PORT, () => {
   console.log(`serena-api escuchando en http://localhost:${PORT}`);
 });

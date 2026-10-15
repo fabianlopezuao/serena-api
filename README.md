@@ -34,3 +34,9 @@ API en `http://localhost:4000`.
 - `POST /reflections`
 - `POST /votes`
 - `GET /sessions/:id/stats` (panel profesor)
+- `POST /teachers/register` { email, password, teacher_code, full_name? }
+- `POST /teachers/login` { email, password }
+- `GET /teachers/:id`
+
+> Nota: para login sin fricción desactiva **Confirm email** en
+> Supabase > Authentication > Providers > Email.
